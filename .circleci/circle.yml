@@ -1,0 +1,81 @@
+version: 2.1
+
+jobs: 
+  build: 
+    docker: 
+      - image: circleci/node:10.14-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+      - run: npm install
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+      - run: npm run build
+    
+  test: 
+    docker: 
+      - image: circleci/node:10.14-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+      - run: npm install
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+      - run: npm test
+
+  e2e:
+    docker: 
+      - image: circleci/node:10.14-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+      - run: npm install
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+      - run: npm run e2e
+
+  lint:
+    docker: 
+      - image: circleci/node:10.14-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+      - run: npm install
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+      - run: npm run lint
+
+workflows:
+  version: 2
+  build_and_test: 
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - e2e:
+          requires:
+            - build
+      - lint:
+          requires:
+            - build
